@@ -1,55 +1,87 @@
-from flask.views import MethodView
-from wtforms import Form, StringField, SubmitField
-from flask import Flask, render_template, request
-from calorie import Calorie
-from temperature import Temperature
-
-app = Flask(__name__)
+from random import randint
+import turtle
 
 
-class HomePage(MethodView):
+class Point:
+    """
+    Class that contain x and y coordinates of a point and tells
+    the point falls in given rectangle or not.
+    """
 
-    def get(self):
-        return render_template('index.html')
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
 
-
-class CaloriesFormPage(MethodView):
-
-    def get(self):
-        calories_form = CaloriesForm()
-
-        return render_template('calories_form_page.html',
-                               calories_form=calories_form)
-
-    def post(self):
-        calories_form = CaloriesForm(request.form)
-
-        temperature = Temperature(country=calories_form.country.data,
-                                  city=calories_form.city.data).get()
-
-        calorie = Calorie(weight=float(calories_form.weight.data),
-                          height=float(calories_form.height.data),
-                          age=float(calories_form.age.data),
-                          temperature=temperature)
-
-        calories = calorie.calculate()
-
-        return render_template('calories_form_page.html',
-                               calories_form=calories_form,
-                               calories=calories,
-                               result=True)
+    def falls_in_rectangle(self, rectangle_area):
+        return rectangle_area.point1.x < self.x < rectangle_area.point2.x \
+            and rectangle_area.point1.y < self.y < rectangle_area.point2.y
 
 
-class CaloriesForm(Form):
-    weight = StringField("Weight: ", default=70)
-    height = StringField("Height: ", default=175)
-    age = StringField("Age: ", default=32)
-    country = StringField("Country: ", default="USA")
-    city = StringField("City: ", default="San Francisco")
-    button = SubmitField("Calculate")
+class Rectangle:
+    """
+    Class that contains lower left point (point1) and upper right
+    (point2) of a rectangle and returns the area of rectangle.
+    """
+
+    def __init__(self, point1, point2):
+        self.point1 = point1
+        self.point2 = point2
+
+    def area(self):
+        return (self.point2.x - self.point1.x) * \
+            (self.point2.y - self.point1.y)
 
 
-app.add_url_rule('/', view_func=HomePage.as_view("home_page"))
-app.add_url_rule('/calories_form', view_func=CaloriesFormPage.as_view("calories_form_page"))
+class GuiRectangle(Rectangle):
+    """
+    Child of Rectangle class for a GUI representation of rectangle.
+    """
+    def draw(self, canvas):
+        canvas.penup()
+        canvas.goto(self.point1.x, self.point1.y)
 
-app.run(debug=True)
+        canvas.pendown()
+        canvas.forward(self.point2.x - self.point1.x)
+        canvas.left(90)
+        canvas.forward(self.point2.y - self.point1.y)
+        canvas.left(90)
+        canvas.forward(self.point2.x - self.point1.x)
+        canvas.left(90)
+        canvas.forward(self.point2.y - self.point1.y)
+
+
+class GuiPoint(Point):
+    """Child of Point class for GUI representation of point"""
+
+    def draw(self, canvas, size=5, color='red'):
+        canvas.penup()
+        canvas.goto(self.x, self.y)
+
+        canvas.pendown()
+        canvas.dot(size, color)
+
+        turtle.done()
+
+
+# Create rectangle object
+rectangle = GuiRectangle(Point(randint(0, 200), randint(0, 200)),
+                         Point(randint(10, 200), randint(10, 200)))
+
+# Print rectangle coordinates
+print("Rectangle Coordinates: ",
+      rectangle.point1.x, ",",
+      rectangle.point1.y, "and",
+      rectangle.point2.x, ",",
+      rectangle.point2.y)
+
+# Get point and area from user
+user_point = GuiPoint(float(input("Guess x: ")), float(input("Guess y: ")))
+user_area = float(input("Guess rectangle area: "))
+
+# Print out the game result
+print("Your point was inside rectangle: ", user_point.falls_in_rectangle(rectangle))
+print("Your area was off by: ", rectangle.area() - user_area)
+
+myturtle = turtle.Turtle()
+rectangle.draw(myturtle)
+user_point.draw(myturtle)
