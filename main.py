@@ -3,39 +3,42 @@ import turtle
 
 
 class Point:
-    """
-    Class that contain x and y coordinates of a point and tells
-    the point falls in given rectangle or not.
-    """
-
     def __init__(self, x, y):
-        self.x = x
-        self.y = y
+        self.__x = x
+        self.__y = y
+
+    @property
+    def x(self):
+        return self.__x
+
+    @property
+    def y(self):
+        return self.__y
 
     def falls_in_rectangle(self, rectangle_area):
-        return rectangle_area.point1.x < self.x < rectangle_area.point2.x \
-            and rectangle_area.point1.y < self.y < rectangle_area.point2.y
+        return rectangle_area.point1.x < self.__x < rectangle_area.point2.x and \
+               rectangle_area.point1.y < self.__y < rectangle_area.point2.y
 
 
 class Rectangle:
-    """
-    Class that contains lower left point (point1) and upper right
-    (point2) of a rectangle and returns the area of rectangle.
-    """
-
     def __init__(self, point1, point2):
-        self.point1 = point1
-        self.point2 = point2
+        self.__point1 = point1
+        self.__point2 = point2
+
+    @property
+    def point1(self):
+        return self.__point1
+
+    @property
+    def point2(self):
+        return self.__point2
 
     def area(self):
-        return (self.point2.x - self.point1.x) * \
-            (self.point2.y - self.point1.y)
+        return (self.__point2.x - self.__point1.x) * \
+               (self.__point2.y - self.__point1.y)
 
 
 class GuiRectangle(Rectangle):
-    """
-    Child of Rectangle class for a GUI representation of rectangle.
-    """
     def draw(self, canvas):
         canvas.penup()
         canvas.goto(self.point1.x, self.point1.y)
@@ -51,8 +54,6 @@ class GuiRectangle(Rectangle):
 
 
 class GuiPoint(Point):
-    """Child of Point class for GUI representation of point"""
-
     def draw(self, canvas, size=5, color='red'):
         canvas.penup()
         canvas.goto(self.x, self.y)
@@ -63,24 +64,25 @@ class GuiPoint(Point):
         turtle.done()
 
 
-# Create rectangle object
-rectangle = GuiRectangle(Point(randint(0, 200), randint(0, 200)),
-                         Point(randint(10, 200), randint(10, 200)))
+rectangle = GuiRectangle(
+    Point(randint(0, 200), randint(0, 200)),
+    Point(randint(10, 200), randint(10, 200))
+)
 
-# Print rectangle coordinates
-print("Rectangle Coordinates: ",
+print("Rectangle Coordinates:",
       rectangle.point1.x, ",",
       rectangle.point1.y, "and",
       rectangle.point2.x, ",",
       rectangle.point2.y)
 
-# Get point and area from user
 user_point = GuiPoint(float(input("Guess x: ")), float(input("Guess y: ")))
 user_area = float(input("Guess rectangle area: "))
 
-# Print out the game result
-print("Your point was inside rectangle: ", user_point.falls_in_rectangle(rectangle))
-print("Your area was off by: ", rectangle.area() - user_area)
+print("Your point was inside rectangle: ",
+      user_point.falls_in_rectangle(rectangle))
+
+print("Your area was off by: ",
+      rectangle.area() - user_area)
 
 myturtle = turtle.Turtle()
 rectangle.draw(myturtle)
